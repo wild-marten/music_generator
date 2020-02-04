@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+tests/
+Chord_Transition_Analysis/
+execute
+.vscode/launch.json
+.vscode/tasks.json
