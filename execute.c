@@ -1,15 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "index.h" 
 int main(int argc, char **argv)
 {   
-    //const char *filename=argv[1];
-    
-    FILE *fp = fopen(argv[1], "r");
-    if(fp==NULL)
-        printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    int status;
+    if(argc==1){
+        printf("Please run program with a file");
+        return 0;
+    }
+               
 
-    //int status = system("python abcplay.py aaa.abc");
+    char *play_abc_cmd="python abcplay.py ";
+
+    status = system("python abcplay.py aaa.abc");
+    status = remove(argv[1]);
 
     return 0;
 }
