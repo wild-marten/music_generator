@@ -1,7 +1,7 @@
 #define NUM_OF_SH 25
 #define NUM_OF_INTERVALS 13
 #define NUM_OF_CMP 6
-#define NUM_OF_SEMITONES 13
+#define NUM_OF_SEMITONES 12
 #define CHORD_LENGHT 100
 #define NOTE_LENGHT 5
 
@@ -74,7 +74,7 @@ void extract_chords(FILE *fp, FILE *result);
 char *find_note(int root_position, int sh_cmp);
 char *extract_shorthand(char *chord);
 int shorthand_position(char *chord);
-char *shorthand_to_notes(char *chord);
+char *shorthand_to_notes(char *chord, char *abc_chord);
 char *exeption(char *abc, char *chord, int cmp);
 char *extensions_to_notes(char *chord, char *abc);
 char *inversion(char *abc, char *chord);
