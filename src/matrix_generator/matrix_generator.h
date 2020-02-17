@@ -7,14 +7,19 @@
 #include <gsl/gsl_blas.h>
 
 #define DIMX NUM_OF_CHORDS
-#define DIMY NUM_OF_CHORDS
+#define DIMY NUM_OF_CHORDS + 1
 
-void *clean(void *ptr);
-void **clean_matrix(void **tab, int rows);
+char **initialize_chord_set(int HEIGHT, int WIDTH);
+void read_chords(FILE *fp, char **chord_set);
 char **build_chord_table(FILE *fp);
 int find_chord_id(char **chord_set, char *chord);
 void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *result);
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set);
+double *btm_sums(gsl_matrix *transition_matrix);
+void btm_probability(gsl_matrix *transition_matrix, double *sums);
 void build_transition_matrix(FILE *fp, FILE *result);
+void linear_transformation(gsl_matrix *transition_matrix);
+gsl_vector *QR_calculation(gsl_matrix *transition_matrix);
+gsl_vector *calculate_stationary_distribution(gsl_matrix *transition_matrix);
 
 #endif

@@ -3,6 +3,8 @@
 /*
 ******************TO DO********************
 1. Implement stationary process
+
+# line 434 doesn't have non zero values!!!!!!
 */
 
 char **initialize_chord_set(int HEIGHT, int WIDTH)
@@ -43,8 +45,6 @@ void read_chords(FILE *fp, char **chord_set)
         str = calloc(100, 1);
     }
 
-    // printf("%d", j);
-
     clean(str);
     fseek(fp, 0, SEEK_SET);
 }
@@ -69,13 +69,12 @@ int find_chord_id(char **chord_set, char *chord)
 
 void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *result)
 {
-    gsl_matrix_fprintf(result, transition_matrix, "%f");
+    gsl_matrix_fprintf(result, transition_matrix, "%e");
 
     fprintf(result, "\t");
     for (int i = 0; i < NUM_OF_CHORDS; i++)
         fprintf(result, "%s ", chord_set[i]);
     fprintf(result, "\n");
-
 }
 
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
@@ -99,7 +98,7 @@ void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
 
             nxt_id = find_chord_id(chord_set, next_chord);
 
-            gsl_matrix_set(transition_matrix, crr_id, nxt_id, gsl_matrix_get(transition_matrix, crr_id, nxt_id)+1);
+            gsl_matrix_set(transition_matrix, crr_id, nxt_id, gsl_matrix_get(transition_matrix, crr_id, nxt_id) + 1);
         }
         else
         {
@@ -120,18 +119,100 @@ void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
     clean(next_chord);
 }
 
+double *btm_sums(gsl_matrix *transition_matrix)
+{
+    double *sums = calloc(transition_matrix->size1, sizeof(double));
+
+    for (int i = 0; i < transition_matrix->size1; i++)
+        for (int j = 0; j < transition_matrix->size2; j++)
+            sums[i] += gsl_matrix_get(transition_matrix, i, j);
+
+    return sums;
+}
+
+void btm_probability(gsl_matrix *transition_matrix, double *sums)
+{
+    double value = 0.0;
+
+    for (int i = 0; i < transition_matrix->size1; i++)
+    {
+        for (int j = 0; j < transition_matrix->size2; j++)
+        {
+            value = gsl_matrix_get(transition_matrix, i, j) / sums[i];
+            if (sums[i] != 0)
+                gsl_matrix_set(transition_matrix, i, j, value);
+        }
+    }
+}
+
 void build_transition_matrix(FILE *fp, FILE *result)
 {
-    gsl_matrix *transition_matrix = gsl_matrix_calloc(DIMX, DIMY);
+    gsl_matrix *transition_matrix = gsl_matrix_calloc(DIMY, DIMX);
 
     char **chord_set = build_chord_table(fp);
+    double *sums;
 
     btm_occurences(fp, transition_matrix, chord_set);
 
+    sums = btm_sums(transition_matrix);
+
+    btm_probability(transition_matrix, sums);
+
     write_matrix(chord_set, transition_matrix, result);
 
+    gsl_vector *stdis = calculate_stationary_distribution(transition_matrix);
+
+    FILE *a = fopen("solution.txt", "wb");
+    gsl_vector_fprintf(a, stdis, "%e");
+
+    gsl_vector_free(stdis);
     gsl_matrix_free(transition_matrix);
+    clean(sums);
     clean_matrix((void **)chord_set, NUM_OF_CHORDS);
+}
+
+void linear_transformation(gsl_matrix *transition_matrix)
+{
+    
+    for (int i = 0; i < transition_matrix->size1 - 1; i++)
+        gsl_matrix_set(transition_matrix, i, i, gsl_matrix_get(transition_matrix, i, i) - 1);
+}
+
+gsl_vector *QR_calculation(gsl_matrix *transition_matrix)
+{
+    int M = transition_matrix -> size1,
+        N = transition_matrix -> size2;
+    gsl_vector *x = gsl_vector_alloc(N);
+    gsl_vector *b = gsl_vector_alloc(M);
+
+    for(int j = 0; j < N ; j++)
+        gsl_matrix_set(transition_matrix, M - 1, j, 1); 
+
+    for (int i = 0; i < M; i++)
+        gsl_vector_set(b, i, 0);
+    
+    gsl_vector_set(b, M-1, 1);
+
+    gsl_vector *tau = gsl_vector_alloc(N);
+    gsl_vector *residual = gsl_vector_alloc(M);
+
+    gsl_linalg_QR_decomp(transition_matrix, tau);
+    gsl_linalg_QR_lssolve(transition_matrix, tau, b, x, residual);
+    
+    gsl_vector_free(tau);
+    gsl_vector_free(residual);
+    gsl_vector_free(b);
+
+    return x;
+}
+
+gsl_vector *calculate_stationary_distribution(gsl_matrix *transition_matrix)
+{
+    gsl_vector *solution;
+    linear_transformation(transition_matrix);
+    solution = QR_calculation(transition_matrix);
+
+    return solution;
 }
 
 int main()
