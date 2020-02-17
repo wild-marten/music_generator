@@ -4,7 +4,7 @@
 ******************TO DO********************
 1. Implement stationary process
 
-# line 434 doesn't have non zero values!!!!!!
+# line 432 doesn't have non zero values!!!!!!
 */
 
 char **initialize_chord_set(int HEIGHT, int WIDTH)
@@ -67,14 +67,14 @@ int find_chord_id(char **chord_set, char *chord)
     return j;
 }
 
-void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *result)
+void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *tr_matrix)
 {
-    gsl_matrix_fprintf(result, transition_matrix, "%e");
+    gsl_matrix_fprintf(tr_matrix, transition_matrix, "%e");
 
-    fprintf(result, "\t");
+    fprintf(tr_matrix, "\t");
     for (int i = 0; i < NUM_OF_CHORDS; i++)
-        fprintf(result, "%s ", chord_set[i]);
-    fprintf(result, "\n");
+        fprintf(tr_matrix, "%s ", chord_set[i]);
+    fprintf(tr_matrix, "\n");
 }
 
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
@@ -135,17 +135,15 @@ void btm_probability(gsl_matrix *transition_matrix, double *sums)
     double value = 0.0;
 
     for (int i = 0; i < transition_matrix->size1; i++)
-    {
         for (int j = 0; j < transition_matrix->size2; j++)
         {
             value = gsl_matrix_get(transition_matrix, i, j) / sums[i];
             if (sums[i] != 0)
                 gsl_matrix_set(transition_matrix, i, j, value);
         }
-    }
 }
 
-void build_transition_matrix(FILE *fp, FILE *result)
+void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd)
 {
     gsl_matrix *transition_matrix = gsl_matrix_calloc(DIMY, DIMX);
 
@@ -158,12 +156,11 @@ void build_transition_matrix(FILE *fp, FILE *result)
 
     btm_probability(transition_matrix, sums);
 
-    write_matrix(chord_set, transition_matrix, result);
+    write_matrix(chord_set, transition_matrix, tr_matrix);
 
     gsl_vector *stdis = calculate_stationary_distribution(transition_matrix);
 
-    FILE *a = fopen("solution.txt", "wb");
-    gsl_vector_fprintf(a, stdis, "%e");
+    gsl_vector_fprintf(sd, stdis, "%e");
 
     gsl_vector_free(stdis);
     gsl_matrix_free(transition_matrix);
@@ -173,32 +170,32 @@ void build_transition_matrix(FILE *fp, FILE *result)
 
 void linear_transformation(gsl_matrix *transition_matrix)
 {
-    
+
     for (int i = 0; i < transition_matrix->size1 - 1; i++)
         gsl_matrix_set(transition_matrix, i, i, gsl_matrix_get(transition_matrix, i, i) - 1);
 }
 
 gsl_vector *QR_calculation(gsl_matrix *transition_matrix)
 {
-    int M = transition_matrix -> size1,
-        N = transition_matrix -> size2;
+    int M = transition_matrix->size1,
+        N = transition_matrix->size2;
     gsl_vector *x = gsl_vector_alloc(N);
     gsl_vector *b = gsl_vector_alloc(M);
 
-    for(int j = 0; j < N ; j++)
-        gsl_matrix_set(transition_matrix, M - 1, j, 1); 
+    for (int j = 0; j < N; j++)
+        gsl_matrix_set(transition_matrix, M - 1, j, 1);
 
     for (int i = 0; i < M; i++)
         gsl_vector_set(b, i, 0);
-    
-    gsl_vector_set(b, M-1, 1);
+
+    gsl_vector_set(b, M - 1, 1);
 
     gsl_vector *tau = gsl_vector_alloc(N);
     gsl_vector *residual = gsl_vector_alloc(M);
 
     gsl_linalg_QR_decomp(transition_matrix, tau);
     gsl_linalg_QR_lssolve(transition_matrix, tau, b, x, residual);
-    
+
     gsl_vector_free(tau);
     gsl_vector_free(residual);
     gsl_vector_free(b);
@@ -217,12 +214,14 @@ gsl_vector *calculate_stationary_distribution(gsl_matrix *transition_matrix)
 
 int main()
 {
-    FILE *fp = fopen("build/txt_src/result.txt", "r");
-    FILE *result = fopen("build/txt_src/matrix.txt", "w");
+    FILE *fp = fopen("build/txt_src/res.txt", "r");
+    FILE *tr_matrix = fopen("build/txt_src/tr_matrix.txt", "w");
+    FILE *sd = fopen("build/txt_src/stationary_distribution.txt", "wb");
 
-    build_transition_matrix(fp, result);
+
+    build_transition_matrix(fp, tr_matrix,sd);
 
     fclose(fp);
-    fclose(result);
+    fclose(tr_matrix);
     return 0;
 }
