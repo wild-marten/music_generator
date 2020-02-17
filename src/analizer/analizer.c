@@ -16,7 +16,7 @@
 
 int find_root_pos(char *chord)
 {
-     int j = 0;
+    int j = 0;
 
     while (j < NUM_OF_SEMITONES)
     {
@@ -25,19 +25,19 @@ int find_root_pos(char *chord)
         j++;
     }
 
-    if(chord[1] == 'b')
+    if (chord[1] == 'b')
     {
-        if(j>0)
-            return j-1;
+        if (j > 0)
+            return j - 1;
         else
             return NUM_OF_SEMITONES - 1;
     }
 
-    else if(chord[1] == '#')
+    else if (chord[1] == '#')
     {
-        if(j<NUM_OF_SEMITONES - 2)
-            return j+1;
-        else 
+        if (j < NUM_OF_SEMITONES - 2)
+            return j + 1;
+        else
             return 0;
     }
 
@@ -72,7 +72,6 @@ void extract_chords(FILE *fp, FILE *result)
             fwrite("[", 1, 1, result);
             fwrite(chord, 1, strlen(chord), result);
             fwrite("] ", 1, 2, result);
-                
         }
 
         clean(str);
@@ -85,7 +84,6 @@ void extract_chords(FILE *fp, FILE *result)
     clean(chord);
 }
 
-
 char *find_note(int root_position, int sh_cmp)
 {
     char *note = calloc(NOTE_LENGHT, 1);
@@ -94,7 +92,7 @@ char *find_note(int root_position, int sh_cmp)
     if (sh_cmp % 2 == 1)
         off = 1;
 
-    int semitone_distance =  interval[sh_cmp / 2 - 1] + off;
+    int semitone_distance = interval[sh_cmp / 2 - 1] + off;
     int sem = root_position + semitone_distance;
     int sem_pos = sem % 12;
 
@@ -139,7 +137,7 @@ int shorthand_position(char *chord)
     return j;
 }
 
-char *shorthand_to_notes(char *chord, char  *abc_chord)
+char *shorthand_to_notes(char *chord, char *abc_chord)
 {
     int sh_pos = shorthand_position(chord);
     int j = 0;
@@ -189,7 +187,7 @@ char *extensions_to_notes(char *chord, char *abc_chord)
         return abc_chord;
 
     char *temp = calloc(NOTE_LENGHT, 1);
-    char *note=NULL;
+    char *note = NULL;
     int root_pos = find_root_pos(chord);
     int off = 0;
     j++;
@@ -226,7 +224,7 @@ char *extensions_to_notes(char *chord, char *abc_chord)
 
         else
         {
-            note=find_note(root_pos, atoi(temp) * 2 + off);
+            note = find_note(root_pos, atoi(temp) * 2 + off);
             strcat(abc_chord, note);
             note = clean(note);
             clean(temp);
@@ -238,8 +236,8 @@ char *extensions_to_notes(char *chord, char *abc_chord)
     }
 
     if (temp != 0)
-    {   
-        note=find_note(root_pos, atoi(temp) * 2 + off);
+    {
+        note = find_note(root_pos, atoi(temp) * 2 + off);
         strcat(abc_chord, note);
     }
 
@@ -278,7 +276,7 @@ char *inversion(char *abc, char *chord)
     }
 
     char *to_inver = find_note(root_pos, atoi(tmp) * 2 + off);
-    
+
     j = 0;
     int s = strlen(to_inver);
 
@@ -317,15 +315,15 @@ char *translate_to_abc(char *chord)
 
 int main()
 {
-    FILE *result = fopen("res.txt", "w");
-    
+    FILE *result = fopen("build/txt_src/res.txt", "w");
+
     for (int i = 1; i <= 888; i++)
     {
-        char *num = calloc(10,1);
+        char *num = calloc(10, 1);
 
         sprintf(num, "%d", i);
 
-        char *file = calloc(100,1);
+        char *file = calloc(100, 1);
         strcat(file, "songs/salami_chords.txt.~");
         strcat(file, num);
         strcat(file, "~");
@@ -335,14 +333,19 @@ int main()
         if (fp != NULL)
         {
             extract_chords(fp, result);
-            fclose(fp); 
+            fclose(fp);
         }
+        else
+            perror("fopen");
 
-        
         clean(num);
         clean(file);
     }
-        
-    fclose(result);
+
+    if (result != NULL)
+        fclose(result);
+    else
+        perror("fopen");
+
     return 0;
 }

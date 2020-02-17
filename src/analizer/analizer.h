@@ -1,7 +1,7 @@
 #ifndef ANAL
 #define ANAL
 
-#include"index.h"
+#include"../index.h"
 
 #define NUM_OF_SH 25
 #define NUM_OF_INTERVALS 13
