@@ -1,4 +1,3 @@
-#include "index.h"
 #include "sequence_generator.h"
 
 /*
@@ -9,27 +8,6 @@
 4. Write project description
 5. Estimate keys for generated sequence
 */
-
-void *clean(void *ptr)
-{
-    if (ptr != NULL)
-    {
-        free(ptr);
-        ptr = NULL;
-    }
-    return ptr;
-}
-
-void **clean_matrix(void **tab, int rows)
-{
-    for (int i = 0; i < rows; i++)
-        if (tab[i] != 0)
-            free(tab[i]);
-
-    if (tab != 0)
-        free(tab);
-    return tab;
-}
 
 int **initialize_transition_matrix()
 {

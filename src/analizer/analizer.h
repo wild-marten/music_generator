@@ -1,11 +1,14 @@
+#ifndef ANAL
+#define ANAL
+
+#include"index.h"
+
 #define NUM_OF_SH 25
 #define NUM_OF_INTERVALS 13
 #define NUM_OF_CMP 6
 #define NUM_OF_SEMITONES 12
-#define CHORD_LENGHT 100
 #define NOTE_LENGHT 5
 
-static const char *separator = "$\n";
 
 const char semitone[NUM_OF_SEMITONES][3] = {"C", "^C", "D", "^D", "E", "F", "^F", "G", "^G", "A", "^A", "B"};
 
@@ -79,3 +82,5 @@ char *exeption(char *abc, char *chord, int cmp);
 char *extensions_to_notes(char *chord, char *abc);
 char *inversion(char *abc, char *chord);
 char *translate_to_abc(char *chord);
+
+#endif

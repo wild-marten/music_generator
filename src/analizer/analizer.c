@@ -1,4 +1,3 @@
-#include "index.h"
 #include "analizer.h"
 /*TODO
     ***Implement 'chord' as a structure, such as:
@@ -14,16 +13,6 @@
 
     **fix inversion
 */
-
-void *clean(void *ptr)
-{
-    if (ptr != NULL)
-    {
-        free(ptr);
-        ptr = NULL;
-    }
-    return ptr;
-}
 
 int find_root_pos(char *chord)
 {

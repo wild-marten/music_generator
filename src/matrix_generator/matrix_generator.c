@@ -1,31 +1,9 @@
-#include "index.h"
 #include "matrix_generator.h"
 
 /*
 ******************TO DO********************
 1. Implement stationary process
 */
-
-void *clean(void *ptr)
-{
-    if (ptr != NULL)
-    {
-        free(ptr);
-        ptr = NULL;
-    }
-    return ptr;
-}
-
-void **clean_matrix(void **tab, int rows)
-{
-    for (int i = 0; i < rows; i++)
-        if (tab[i] != 0)
-            free(tab[i]);
-
-    if (tab != 0)
-        free(tab);
-    return tab;
-}
 
 char **build_chord_table(FILE *fp)
 {
