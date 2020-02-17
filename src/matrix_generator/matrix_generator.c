@@ -67,14 +67,11 @@ int find_chord_id(char **chord_set, char *chord)
     return j;
 }
 
-void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *tr_matrix)
+void write_chord_set(char **chord_set, FILE *chs)
 {
-    gsl_matrix_fprintf(tr_matrix, transition_matrix, "%e");
-
-    fprintf(tr_matrix, "\t");
     for (int i = 0; i < NUM_OF_CHORDS; i++)
-        fprintf(tr_matrix, "%s ", chord_set[i]);
-    fprintf(tr_matrix, "\n");
+        fprintf(chs, "%s ", chord_set[i]);
+    fprintf(chs, "\n");
 }
 
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
@@ -143,25 +140,28 @@ void btm_probability(gsl_matrix *transition_matrix, double *sums)
         }
 }
 
-void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd)
+void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd, FILE *chs)
 {
     gsl_matrix *transition_matrix = gsl_matrix_calloc(DIMY, DIMX);
-
     char **chord_set = build_chord_table(fp);
+
+    /****************************SAVE CHORD SET****************************/
+    write_chord_set(chord_set, chs);
+
     double *sums;
-
     btm_occurences(fp, transition_matrix, chord_set);
-
     sums = btm_sums(transition_matrix);
-
     btm_probability(transition_matrix, sums);
 
-    write_matrix(chord_set, transition_matrix, tr_matrix);
+    /******************SAVE TRANSITION PROBABILITY MATRIX******************/
+    gsl_matrix_fprintf(tr_matrix, transition_matrix, "%e");
 
     gsl_vector *stdis = calculate_stationary_distribution(transition_matrix);
 
+    /*********************SAVE STATIONARY DISTRIBUTION*********************/
     gsl_vector_fprintf(sd, stdis, "%e");
 
+    /**************************TIDY UP SECTION*****************************/
     gsl_vector_free(stdis);
     gsl_matrix_free(transition_matrix);
     clean(sums);
@@ -216,10 +216,10 @@ int main()
 {
     FILE *fp = fopen("build/txt_src/res.txt", "r");
     FILE *tr_matrix = fopen("build/txt_src/tr_matrix.txt", "w");
-    FILE *sd = fopen("build/txt_src/stationary_distribution.txt", "wb");
+    FILE *sd = fopen("build/txt_src/stationary_distribution.txt", "w");
+    FILE *chs = fopen("build/txt_src/chord_set.txt", "w");
 
-
-    build_transition_matrix(fp, tr_matrix,sd);
+    build_transition_matrix(fp, tr_matrix, sd, chs);
 
     fclose(fp);
     fclose(tr_matrix);

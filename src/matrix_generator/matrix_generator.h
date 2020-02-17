@@ -17,7 +17,7 @@ void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *tr_matr
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set);
 double *btm_sums(gsl_matrix *transition_matrix);
 void btm_probability(gsl_matrix *transition_matrix, double *sums);
-void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd);
+void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd, FILE *chs);
 void linear_transformation(gsl_matrix *transition_matrix);
 gsl_vector *QR_calculation(gsl_matrix *transition_matrix);
 gsl_vector *calculate_stationary_distribution(gsl_matrix *transition_matrix);
