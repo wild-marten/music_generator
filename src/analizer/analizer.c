@@ -11,6 +11,8 @@
         char *execeptions;
         char *reverse;
     }chord;
+
+    **fix inversion
 */
 
 void *clean(void *ptr)

@@ -1,4 +1,10 @@
+#include "index.h"
 #include "matrix_generator.h"
+
+/*
+******************TO DO********************
+1. Implement stationary process
+*/
 
 void *clean(void *ptr)
 {
@@ -10,9 +16,9 @@ void *clean(void *ptr)
     return ptr;
 }
 
-void **clean_matrix(void **tab, int columns)
+void **clean_matrix(void **tab, int rows)
 {
-    for (int i = 0; i < columns; i++)
+    for (int i = 0; i < rows; i++)
         if (tab[i] != 0)
             free(tab[i]);
 
@@ -101,25 +107,17 @@ void write_matrix(char **chord_set, int **transition_matrix, FILE *result)
 {
     fprintf(result, "\t");
     for (int i = 0; i < NUM_OF_CHORDS; i++)
-        fprintf(result, "%s", chord_set[i]);
+        fprintf(result, "%s ", chord_set[i]);
     fprintf(result, "\n");
 
     for (int i = 0; i < NUM_OF_CHORDS; i++)
     {
-        fprintf(result, "%s ", chord_set[i]);
-
         for (int j = 0; j < NUM_OF_CHORDS; j++)
             fprintf(result, "%d ", transition_matrix[i][j]);
         fprintf(result, "\n");
     }
 }
 
-int gcd(int a, int b)
-{
-    if (b == 0)
-        return a;
-    return gcd(b, a % b);
-}
 
 void btm_occurences(FILE *fp, int **transition_matrix, char **chord_set)
 {
@@ -177,7 +175,7 @@ void build_transition_matrix(FILE *fp, FILE *result)
     char **chord_set = build_chord_table(fp);
 
     btm_occurences(fp, transition_matrix, chord_set);
-    btm_prefix_sums(transition_matrix);
+    // btm_prefix_sums(transition_matrix);
 
     write_matrix(chord_set, transition_matrix, result);
     clean_matrix((void **)transition_matrix, NUM_OF_CHORDS);
