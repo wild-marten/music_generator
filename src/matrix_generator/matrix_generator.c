@@ -5,13 +5,18 @@
 1. Implement stationary process
 */
 
-char **build_chord_table(FILE *fp)
+char **initialize_chord_set(int HEIGHT, int WIDTH)
 {
-    char **chord_set = calloc(NUM_OF_CHORDS, sizeof(char *));
+    char **chord_set = calloc(HEIGHT, sizeof(char *));
 
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-        chord_set[i] = calloc(CHORD_LENGHT, 1);
+    for (int i = 0; i < HEIGHT; i++)
+        chord_set[i] = calloc(WIDTH, 1);
 
+    return chord_set;
+}
+
+void read_chords(FILE *fp, char **chord_set)
+{
     char *str = calloc(100, 1);
     int j = 0, flag = 0;
 
@@ -37,19 +42,19 @@ char **build_chord_table(FILE *fp)
         str = clean(str);
         str = calloc(100, 1);
     }
+
+    // printf("%d", j);
+
     clean(str);
     fseek(fp, 0, SEEK_SET);
-    return chord_set;
 }
 
-int **initialize_transition_matrix()
+char **build_chord_table(FILE *fp)
 {
-    int **transition_matrix = calloc(NUM_OF_CHORDS, sizeof(int *));
+    char **chord_set = initialize_chord_set(NUM_OF_CHORDS, CHORD_LENGHT);
+    read_chords(fp, chord_set);
 
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-        transition_matrix[i] = calloc(NUM_OF_CHORDS, sizeof(int));
-
-    return transition_matrix;
+    return chord_set;
 }
 
 int find_chord_id(char **chord_set, char *chord)
@@ -62,42 +67,18 @@ int find_chord_id(char **chord_set, char *chord)
     return j;
 }
 
-void print_matrix(char **chord_set, int **transition_matrix)
+void write_matrix(char **chord_set, gsl_matrix *transition_matrix, FILE *result)
 {
-    printf("\t");
+    gsl_matrix_fprintf(result, transition_matrix, "%f");
 
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-        printf("%s ", chord_set[i]);
-    printf("\n");
-
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-    {
-        printf("%s ", chord_set[i]);
-        for (int j = 0; j < NUM_OF_CHORDS; j++)
-        {
-            printf("%d ", transition_matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void write_matrix(char **chord_set, int **transition_matrix, FILE *result)
-{
     fprintf(result, "\t");
     for (int i = 0; i < NUM_OF_CHORDS; i++)
         fprintf(result, "%s ", chord_set[i]);
     fprintf(result, "\n");
 
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-    {
-        for (int j = 0; j < NUM_OF_CHORDS; j++)
-            fprintf(result, "%d ", transition_matrix[i][j]);
-        fprintf(result, "\n");
-    }
 }
 
-
-void btm_occurences(FILE *fp, int **transition_matrix, char **chord_set)
+void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
 {
     char *current_chord = calloc(CHORD_LENGHT, sizeof(char));
     char *next_chord = calloc(CHORD_LENGHT, sizeof(char));
@@ -118,7 +99,7 @@ void btm_occurences(FILE *fp, int **transition_matrix, char **chord_set)
 
             nxt_id = find_chord_id(chord_set, next_chord);
 
-            transition_matrix[crr_id][nxt_id]++;
+            gsl_matrix_set(transition_matrix, crr_id, nxt_id, gsl_matrix_get(transition_matrix, crr_id, nxt_id)+1);
         }
         else
         {
@@ -139,33 +120,28 @@ void btm_occurences(FILE *fp, int **transition_matrix, char **chord_set)
     clean(next_chord);
 }
 
-void btm_prefix_sums(int **transition_matrix)
-{
-    for (int i = 0; i < NUM_OF_CHORDS; i++)
-        for (int j = 0; j < NUM_OF_CHORDS; j++)
-            if (j != 0)
-                transition_matrix[i][j] += transition_matrix[i][j - 1];
-}
-
 void build_transition_matrix(FILE *fp, FILE *result)
 {
-    int **transition_matrix = initialize_transition_matrix();
+    gsl_matrix *transition_matrix = gsl_matrix_calloc(DIMX, DIMY);
+
     char **chord_set = build_chord_table(fp);
 
     btm_occurences(fp, transition_matrix, chord_set);
-    // btm_prefix_sums(transition_matrix);
 
     write_matrix(chord_set, transition_matrix, result);
-    clean_matrix((void **)transition_matrix, NUM_OF_CHORDS);
+
+    gsl_matrix_free(transition_matrix);
     clean_matrix((void **)chord_set, NUM_OF_CHORDS);
 }
 
 int main()
 {
-    FILE *fp = fopen("res.txt", "r");
-    FILE *result = fopen("../matrix.txt", "w");
+    FILE *fp = fopen("build/txt_src/result.txt", "r");
+    FILE *result = fopen("build/txt_src/matrix.txt", "w");
+
     build_transition_matrix(fp, result);
 
     fclose(fp);
+    fclose(result);
     return 0;
 }
