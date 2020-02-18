@@ -6,19 +6,11 @@
         {
             "type": "shell",
             "label": "gcc build active file",
-            "command": "/usr/bin/gcc",
+            "command": "make",
             "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileBasenameNoExtension}"
             ],
-            "options": {
-                "cwd": "/usr/bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
+          
             "group": "build"
         }
     ]

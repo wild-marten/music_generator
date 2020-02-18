@@ -9,6 +9,8 @@
 #define DIMX NUM_OF_CHORDS
 #define DIMY NUM_OF_CHORDS + 1
 
+void *clean(void *ptr);
+void **clean_matrix(void **tab, int rows);
 char **initialize_chord_set(int HEIGHT, int WIDTH);
 void read_chords(FILE *fp, char **chord_set);
 char **build_chord_table(FILE *fp);

@@ -66,11 +66,12 @@ const int shorthand_components[NUM_OF_SH][NUM_OF_CMP] ={
 {6, 10, 14, 18, 22, 26},        //maj13
 {5, 10, 13, 18, 22, 26},        //min13
 {10},                           //5
-{2}                             //1
+{0}                              //1
 };                       
 //intervals times two to keep it integer
 
-
+void *clean(void *ptr);
+void **clean_matrix(void **tab, int rows);
 int find_root_pos(char *chord);
 bool is_mirex_chord(char *str);
 void extract_chords(FILE *fp, FILE *result);

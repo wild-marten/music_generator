@@ -1,11 +1,24 @@
 #include "matrix_generator.h"
 
-/*
-******************TO DO********************
-1. Implement stationary process
+void *clean(void *ptr)
+{
+    if (ptr != NULL)
+    {
+        free(ptr);
+        ptr = NULL;
+    }
+    return ptr;
+}
 
-# line 432 doesn't have non zero values!!!!!!
-*/
+void **clean_matrix(void **tab, int rows)
+{
+    for (int i = 0; i < rows; i++)
+        if (tab[i] != 0)
+            free(tab[i]);
+
+    tab = clean(tab);
+    return tab;
+}
 
 char **initialize_chord_set(int HEIGHT, int WIDTH)
 {
@@ -70,8 +83,7 @@ int find_chord_id(char **chord_set, char *chord)
 void write_chord_set(char **chord_set, FILE *chs)
 {
     for (int i = 0; i < NUM_OF_CHORDS; i++)
-        fprintf(chs, "%s ", chord_set[i]);
-    fprintf(chs, "\n");
+        fprintf(chs, "%s\n", chord_set[i]);
 }
 
 void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
@@ -118,11 +130,13 @@ void btm_occurences(FILE *fp, gsl_matrix *transition_matrix, char **chord_set)
 
 double *btm_sums(gsl_matrix *transition_matrix)
 {
-    double *sums = calloc(transition_matrix->size1, sizeof(double));
+    double *sums = calloc(NUM_OF_CHORDS, sizeof(double));
 
-    for (int i = 0; i < transition_matrix->size1; i++)
-        for (int j = 0; j < transition_matrix->size2; j++)
+    for (int i = 0; i < NUM_OF_CHORDS; i++)
+    {
+        for (int j = 0; j < NUM_OF_CHORDS; j++)
             sums[i] += gsl_matrix_get(transition_matrix, i, j);
+    }
 
     return sums;
 }
@@ -131,12 +145,14 @@ void btm_probability(gsl_matrix *transition_matrix, double *sums)
 {
     double value = 0.0;
 
-    for (int i = 0; i < transition_matrix->size1; i++)
-        for (int j = 0; j < transition_matrix->size2; j++)
+    for (int i = 0; i < NUM_OF_CHORDS; i++)
+        for (int j = 0; j < NUM_OF_CHORDS; j++)
         {
-            value = gsl_matrix_get(transition_matrix, i, j) / sums[i];
             if (sums[i] != 0)
+            {
+                value = gsl_matrix_get(transition_matrix, i, j) / sums[i];
                 gsl_matrix_set(transition_matrix, i, j, value);
+            }
         }
 }
 
@@ -171,7 +187,7 @@ void build_transition_matrix(FILE *fp, FILE *tr_matrix, FILE *sd, FILE *chs)
 void linear_transformation(gsl_matrix *transition_matrix)
 {
 
-    for (int i = 0; i < transition_matrix->size1 - 1; i++)
+    for (int i = 0; i < NUM_OF_CHORDS; i++)
         gsl_matrix_set(transition_matrix, i, i, gsl_matrix_get(transition_matrix, i, i) - 1);
 }
 

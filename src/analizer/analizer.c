@@ -1,5 +1,25 @@
 #include "analizer.h"
 
+void *clean(void *ptr)
+{
+    if (ptr != NULL)
+    {
+        free(ptr);
+        ptr = NULL;
+    }
+    return ptr;
+}
+
+void **clean_matrix(void **tab, int rows)
+{
+    for (int i = 0; i < rows; i++)
+        if (tab[i] != 0)
+            free(tab[i]);
+
+    tab = clean(tab);
+    return tab;
+}
+
 int find_root_pos(char *chord)
 {
     int j = 0;
@@ -211,18 +231,6 @@ char *extensions_to_notes(char *chord, char *abc_chord)
         {
             note = find_note(root_pos, atoi(temp) * 2 + off);
 
-            /**************************************************************************************/
-            int cp = shorthand_position(chord);
-            int pp = 0;
-
-            while (pp < NUM_OF_CMP && shorthand_components[cp][pp] != 0)
-            {
-                if (shorthand_components[cp][pp] > atoi(temp) * 2 + off)
-                    printf("%s UPS\n", chord);
-                pp++;
-            }
-            /*****************************************************************************************/
-
             strcat(abc_chord, note);
             note = clean(note);
             clean(temp);
@@ -277,6 +285,7 @@ char *inversion(char *abc, char *chord)
 
     j = 0;
     int s = strlen(to_inver);
+    int p=0; 
 
     while (j <= (int)(strlen(abc) - s) && strncmp(abc + j, to_inver, s) != 0)
         j++;
@@ -286,9 +295,12 @@ char *inversion(char *abc, char *chord)
     if (j <= (int)(strlen(abc) - s))
         strncat(inverted, abc + j, strlen(abc) - j);
     else
+    {
         strcat(inverted, to_inver);
+        p += s;
+    }
 
-    for (int i = 0; i < j; i++)
+    for (int i = p; i < j; i++)
     {
         inverted[strlen(inverted)] = abc[i];
 
