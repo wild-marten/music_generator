@@ -66,7 +66,7 @@ const int shorthand_components[NUM_OF_SH][NUM_OF_CMP] ={
 {6, 10, 14, 18, 22, 26},        //maj13
 {5, 10, 13, 18, 22, 26},        //min13
 {10},                           //5
-{6, 10}                         //1
+{2}                             //1
 };                       
 //intervals times two to keep it integer
 

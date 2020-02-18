@@ -1,18 +1,4 @@
 #include "analizer.h"
-/*TODO
-    ***Implement 'chord' as a structure, such as:
-    typedef struct chord
-    {
-        char *name;
-        char *root;
-        char *shorthand;
-        int *components;
-        char *execeptions;
-        char *reverse;
-    }chord;
-
-    **fix inversion
-*/
 
 int find_root_pos(char *chord)
 {
@@ -73,7 +59,6 @@ void extract_chords(FILE *fp, FILE *result)
             fwrite(chord, 1, strlen(chord), result);
             fwrite("] ", 1, 2, result);
         }
-
         clean(str);
         chord = clean(chord);
         str = calloc(CHORD_LENGHT, 1);
@@ -225,6 +210,19 @@ char *extensions_to_notes(char *chord, char *abc_chord)
         else
         {
             note = find_note(root_pos, atoi(temp) * 2 + off);
+
+            /**************************************************************************************/
+            int cp = shorthand_position(chord);
+            int pp = 0;
+
+            while (pp < NUM_OF_CMP && shorthand_components[cp][pp] != 0)
+            {
+                if (shorthand_components[cp][pp] > atoi(temp) * 2 + off)
+                    printf("%s UPS\n", chord);
+                pp++;
+            }
+            /*****************************************************************************************/
+
             strcat(abc_chord, note);
             note = clean(note);
             clean(temp);
@@ -285,7 +283,10 @@ char *inversion(char *abc, char *chord)
 
     char *inverted = calloc(CHORD_LENGHT, 1);
 
-    strncat(inverted, abc + j, strlen(abc) - j);
+    if (j <= (int)(strlen(abc) - s))
+        strncat(inverted, abc + j, strlen(abc) - j);
+    else
+        strcat(inverted, to_inver);
 
     for (int i = 0; i < j; i++)
     {
